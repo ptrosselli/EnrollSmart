@@ -1,0 +1,445 @@
+import { useMemo, useState } from 'react';
+
+const COURSES = [
+  {
+    id: 'CS 401',
+    title: 'Advanced Algorithms',
+    description:
+      'In-depth study of algorithm design and analysis, including dynamic programming, graph algorithms, and computational complexity.',
+    instructor: 'Prof. Dr. Sarah Chen',
+    location: 'Science Hall 204',
+    schedule: 'MWF 10:00–11:00 AM',
+    enrolled: 28,
+    capacity: 30,
+    credits: 4,
+    prerequisites: ['CS 201', 'CS 301'],
+    seatsLeft: 2,
+  },
+  {
+    id: 'MATH 305',
+    title: 'Linear Algebra',
+    description:
+      'Core study of matrices, vector spaces, linear transformations, eigenvalues, and applications across computing and engineering.',
+    instructor: 'Dr. Elena Park',
+    location: 'Math Building 101',
+    schedule: 'TR 2:00–3:15 PM',
+    enrolled: 22,
+    capacity: 25,
+    credits: 3,
+    prerequisites: ['MATH 211'],
+    seatsLeft: 3,
+  },
+  {
+    id: 'HCI 410',
+    title: 'Human-Computer Interaction',
+    description:
+      'Principles of user-centered design, interface prototyping, evaluation methods, and usability engineering.',
+    instructor: 'Prof. James Rivera',
+    location: 'Torgersen 3150',
+    schedule: 'MW 2:30–3:45 PM',
+    enrolled: 17,
+    capacity: 24,
+    credits: 3,
+    prerequisites: ['CS 210'],
+    seatsLeft: 7,
+  },
+];
+
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const DAY_CODE_MAP = {
+  M: 'Monday',
+  T: 'Tuesday',
+  W: 'Wednesday',
+  R: 'Thursday',
+  F: 'Friday',
+};
+
+const START_HOUR = 8;
+const END_HOUR = 17;
+const HOUR_HEIGHT = 80;
+const GRID_HEIGHT = (END_HOUR - START_HOUR) * HOUR_HEIGHT;
+
+export default function App() {
+  const [activeView, setActiveView] = useState('browse');
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+
+  const enrolledCourses = useMemo(
+    () => COURSES.filter((course) => enrolledCourseIds.includes(course.id)),
+    [enrolledCourseIds]
+  );
+
+  const totalCredits = useMemo(
+    () => enrolledCourses.reduce((sum, course) => sum + course.credits, 0),
+    [enrolledCourses]
+  );
+
+  const courseCount = enrolledCourses.length;
+  const status = totalCredits >= 12 ? 'Full-time' : totalCredits > 0 ? 'Part-time' : 'Not enrolled';
+
+  const toggleEnrollment = (courseId) => {
+    setEnrolledCourseIds((prev) =>
+      prev.includes(courseId) ? prev.filter((id) => id !== courseId) : [...prev, courseId]
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f5f5f6] text-slate-900">
+      <header className="bg-gradient-to-r from-[#6b1028] via-[#8f2d2d] to-[#d97706] px-6 py-8 shadow-sm md:px-10">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white">
+              <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2 8l10-5 10 5-10 5L2 8Z" />
+                <path d="M6 10v4c0 1.5 2.7 3 6 3s6-1.5 6-3v-4" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+                Course Registration
+              </h1>
+              <p className="mt-1 text-lg text-white/85">Spring 2026 Semester</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 py-8 md:px-10">
+        <section className="rounded-2xl bg-gradient-to-r from-[#701a33] via-[#9a3412] to-[#ea580c] p-6 text-white shadow-lg">
+          <h2 className="text-2xl font-bold">Enrollment Summary</h2>
+
+          <div className="mt-8 grid gap-8 md:grid-cols-3">
+            <SummaryStat
+              label="Total Credits"
+              value={String(totalCredits)}
+              subtext={
+                totalCredits >= 12
+                  ? 'Full-time load reached'
+                  : `${Math.max(12 - totalCredits, 0)} more for full-time`
+              }
+            />
+            <SummaryStat label="Course Count" value={String(courseCount)} subtext="Currently enrolled" />
+            <SummaryStat label="Status" value={status} subtext="" />
+          </div>
+        </section>
+
+        <section className="mt-6 flex flex-wrap gap-4">
+          <button
+            onClick={() => setActiveView('browse')}
+            className={`rounded-xl px-6 py-3 font-semibold shadow-md transition ${
+              activeView === 'browse'
+                ? 'bg-[#9f1f39] text-white hover:brightness-110'
+                : 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50'
+            }`}
+          >
+            Browse Courses
+          </button>
+
+          <button
+            onClick={() => setActiveView('schedule')}
+            className={`rounded-xl px-6 py-3 font-semibold shadow-md transition ${
+              activeView === 'schedule'
+                ? 'bg-[#9f1f39] text-white hover:brightness-110'
+                : 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50'
+            }`}
+          >
+            View Schedule
+          </button>
+        </section>
+
+        {activeView === 'browse' ? (
+          <>
+            <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="grid gap-5 md:grid-cols-3">
+                <Field label="Search Courses">
+                  <input
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none ring-0 transition placeholder:text-slate-400 focus:border-[#7a294f]"
+                    placeholder="Course name or code..."
+                  />
+                </Field>
+
+                <Field label="Department">
+                  <select className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#7a294f]">
+                    <option>All Departments</option>
+                    <option>Computer Science</option>
+                    <option>Mathematics</option>
+                    <option>Human-Computer Interaction</option>
+                  </select>
+                </Field>
+
+                <Field label="Credits">
+                  <select className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#7a294f]">
+                    <option>All Credits</option>
+                    <option>1–2 Credits</option>
+                    <option>3 Credits</option>
+                    <option>4+ Credits</option>
+                  </select>
+                </Field>
+              </div>
+            </section>
+
+            <section className="mt-7 space-y-5">
+              {COURSES.map((course) => {
+                const isEnrolled = enrolledCourseIds.includes(course.id);
+
+                return (
+                  <article
+                    key={course.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+                  >
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-4">
+                          <span className="rounded-full bg-slate-100 px-4 py-1 text-sm font-semibold text-slate-600">
+                            {course.id}
+                          </span>
+                          <span className="text-sm font-semibold text-[#c39a57]">
+                            {course.seatsLeft} seats left
+                          </span>
+                        </div>
+
+                        <h3 className="mt-4 text-4xl font-semibold tracking-tight text-[#2d1c1f]">
+                          {course.title}
+                        </h3>
+
+                        <p className="mt-4 max-w-4xl text-xl leading-9 text-slate-500">
+                          {course.description}
+                        </p>
+
+                        <div className="mt-6 grid gap-3 text-slate-700 md:grid-cols-2">
+                          <InfoItem>{course.instructor}</InfoItem>
+                          <InfoItem>{course.schedule}</InfoItem>
+                          <InfoItem>{course.location}</InfoItem>
+                          <InfoItem>
+                            {course.enrolled}/{course.capacity} enrolled
+                          </InfoItem>
+                        </div>
+
+                        <p className="mt-5 text-slate-500">
+                          Prerequisites: {course.prerequisites.join(', ')}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-4">
+                        <div className="text-right">
+                          <div className="text-4xl font-bold text-[#9f1f39]">{course.credits}</div>
+                          <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Credits</div>
+                        </div>
+
+                        <button
+                          onClick={() => toggleEnrollment(course.id)}
+                          className={`rounded-xl px-6 py-3 font-semibold text-white shadow transition hover:brightness-110 ${
+                            isEnrolled ? 'bg-emerald-600' : 'bg-[#1d3f73]'
+                          }`}
+                        >
+                          {isEnrolled ? 'Enrolled' : '+ Add Course'}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </section>
+          </>
+        ) : (
+          <ScheduleView
+            enrolledCourses={enrolledCourses}
+            totalCredits={totalCredits}
+            courseCount={courseCount}
+            status={status}
+          />
+        )}
+      </main>
+    </div>
+  );
+}
+
+function ScheduleView({ enrolledCourses, totalCredits, courseCount, status }) {
+  const blocks = useMemo(() => buildScheduleBlocks(enrolledCourses), [enrolledCourses]);
+
+  return (
+    <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h2 className="text-4xl font-semibold tracking-tight text-[#2d1c1f]">Your Schedule</h2>
+          <p className="mt-2 text-slate-500">Weekly calendar for enrolled courses</p>
+        </div>
+
+        {/* <div className="grid gap-4 sm:grid-cols-3">
+          <ScheduleMiniStat label="Total Credits" value={String(totalCredits)} />
+          <ScheduleMiniStat label="Course Count" value={String(courseCount)} />
+          <ScheduleMiniStat label="Status" value={status} />
+        </div> */}
+      </div>
+
+      {enrolledCourses.length === 0 ? (
+        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-slate-500">
+          No courses enrolled yet. Add courses in Browse Courses to populate the calendar.
+        </div>
+      ) : (
+        <div className="mt-6 overflow-x-auto">
+          <div className="min-w-[1040px] overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div
+              className="grid"
+              style={{ gridTemplateColumns: '80px repeat(5, minmax(0, 1fr))' }}
+            >
+              <div className="border-b border-r border-slate-200 bg-slate-50" />
+              {DAYS.map((day) => (
+                <div
+                  key={day}
+                  className="border-b border-r border-slate-200 bg-slate-50 px-4 py-3 text-center font-semibold text-slate-800 last:border-r-0"
+                >
+                  {day}
+                </div>
+              ))}
+
+              <div className="border-r border-slate-200 bg-slate-50">
+                {Array.from({ length: END_HOUR - START_HOUR }).map((_, index) => {
+                  const hour = START_HOUR + index;
+                  return (
+                    <div
+                      key={hour}
+                      className="border-b border-slate-200 px-3 py-2 text-sm text-slate-500"
+                      style={{ height: `${HOUR_HEIGHT}px` }}
+                    >
+                      {formatHourLabel(hour)}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {DAYS.map((day) => (
+                <div
+                  key={day}
+                  className="relative border-r border-slate-200 last:border-r-0"
+                  style={{ height: `${GRID_HEIGHT}px` }}
+                >
+                  <div className="absolute inset-0">
+                    {Array.from({ length: END_HOUR - START_HOUR }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="border-b border-slate-200"
+                        style={{ height: `${HOUR_HEIGHT}px` }}
+                      />
+                    ))}
+                  </div>
+
+                  {blocks
+                    .filter((block) => block.day === day)
+                    .map((block) => (
+                      <div
+                        key={`${block.course.id}-${day}`}
+                        className={`absolute left-1.5 right-1.5 z-10 rounded-md p-3 text-white shadow-md ${
+                          block.course.id.startsWith('CS')
+                            ? 'bg-[#98243b]'
+                            : block.course.id.startsWith('MATH')
+                            ? 'bg-[#274675]'
+                            : 'bg-[#5f335f]'
+                        }`}
+                        style={{
+                          top: `${block.top}px`,
+                          height: `${block.height}px`,
+                        }}
+                      >
+                        <div className="text-sm font-bold">{block.course.id}</div>
+                        <div className="mt-1 text-sm">{block.course.title}</div>
+                        <div className="mt-1 text-sm opacity-90">{block.course.location}</div>
+                      </div>
+                    ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ScheduleMiniStat({ label, value }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="mt-1 text-lg font-bold text-slate-900">{value}</div>
+    </div>
+  );
+}
+
+function buildScheduleBlocks(courses) {
+  return courses.flatMap((course) => {
+    const parsed = parseSchedule(course.schedule);
+    if (!parsed) return [];
+
+    return parsed.days.map((day) => {
+      const startMinutes = parsed.startHour * 60 + parsed.startMinute;
+      const endMinutes = parsed.endHour * 60 + parsed.endMinute;
+      const minutesFromStart = startMinutes - START_HOUR * 60;
+      const duration = endMinutes - startMinutes;
+
+      return {
+        day,
+        course,
+        top: (minutesFromStart / 60) * HOUR_HEIGHT,
+        height: (duration / 60) * HOUR_HEIGHT,
+      };
+    });
+  });
+}
+
+function parseSchedule(schedule) {
+  const match = schedule.match(/^([MTWRF]+)\s+(\d{1,2}:\d{2})–(\d{1,2}:\d{2})\s*(AM|PM)$/i);
+  if (!match) return null;
+
+  const [, dayCodes, startRaw, endRaw, meridiem] = match;
+
+  const start = to24Hour(startRaw, meridiem);
+  const end = to24Hour(endRaw, meridiem);
+
+  return {
+    days: dayCodes.split('').map((code) => DAY_CODE_MAP[code]),
+    startHour: start.hour,
+    startMinute: start.minute,
+    endHour: end.hour,
+    endMinute: end.minute,
+  };
+}
+
+function to24Hour(time, meridiem) {
+  let [hour, minute] = time.split(':').map(Number);
+
+  if (meridiem.toUpperCase() === 'AM') {
+    if (hour === 12) hour = 0;
+  } else {
+    if (hour !== 12) hour += 12;
+  }
+
+  return { hour, minute };
+}
+
+function formatHourLabel(hour24) {
+  const suffix = hour24 >= 12 ? 'PM' : 'AM';
+  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return `${hour12}:00 ${suffix}`;
+}
+
+function SummaryStat({ label, value, subtext }) {
+  return (
+    <div>
+      <div className="text-sm font-semibold tracking-wide text-white/85">{label}</div>
+      <div className="mt-3 text-5xl font-bold">{value}</div>
+      {subtext ? <div className="mt-2 text-white/75">{subtext}</div> : null}
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <label className="block">
+      <div className="mb-2 text-sm font-semibold text-slate-800">{label}</div>
+      {children}
+    </label>
+  );
+}
+
+function InfoItem({ children }) {
+  return <div className="text-base">{children}</div>;
+}
