@@ -1,8 +1,12 @@
 import { useMemo, useState } from 'react';
 
+import { Routes, Route } from "react-router-dom";
+import UserCentered from "./User-Centered";
+
 const COURSES = [
   {
     id: 'CS 401',
+    department: 'Computer Science',
     title: 'Advanced Algorithms',
     description:
       'In-depth study of algorithm design and analysis, including dynamic programming, graph algorithms, and computational complexity.',
@@ -16,7 +20,53 @@ const COURSES = [
     seatsLeft: 2,
   },
   {
+    id: 'CS 260',
+    department: 'Computer Science',
+    title: 'Data Structures and Software Design',
+    description:
+      'Arrays, linked structures, stacks, queues, trees, hash tables, and design tradeoffs used in larger software systems.',
+    instructor: 'Dr. Priya Shah',
+    location: 'Whittemore 120',
+    schedule: 'TR 9:30–10:45 AM',
+    enrolled: 34,
+    capacity: 40,
+    credits: 3,
+    prerequisites: ['CS 111'],
+    seatsLeft: 6,
+  },
+  {
+    id: 'CS 375',
+    department: 'Computer Science',
+    title: 'Intro to Database Management Systems',
+    description:
+      'Relational modeling, SQL, normalization, indexing, transactions, and building database-backed applications.',
+    instructor: 'Prof. Mateo Alvarez',
+    location: 'McBryde 225',
+    schedule: 'MW 1:00–2:15 PM',
+    enrolled: 39,
+    capacity: 40,
+    credits: 3,
+    prerequisites: ['CS 260'],
+    seatsLeft: 1,
+  },
+  {
+    id: 'CS 4624',
+    department: 'Computer Science',
+    title: 'Multimedia, Hypertext, and Information Access',
+    description:
+      'Search interfaces, information retrieval, recommender systems, and evaluation of interactive information systems.',
+    instructor: 'Dr. Nia Thompson',
+    location: 'Torgersen 1100',
+    schedule: 'TR 12:30–1:45 PM',
+    enrolled: 18,
+    capacity: 30,
+    credits: 3,
+    prerequisites: ['CS 311'],
+    seatsLeft: 12,
+  },
+  {
     id: 'MATH 305',
+    department: 'Mathematics',
     title: 'Linear Algebra',
     description:
       'Core study of matrices, vector spaces, linear transformations, eigenvalues, and applications across computing and engineering.',
@@ -30,7 +80,38 @@ const COURSES = [
     seatsLeft: 3,
   },
   {
+    id: 'MATH 3134',
+    department: 'Mathematics',
+    title: 'Applied Combinatorics and Graph Theory',
+    description:
+      'Counting methods, recurrence relations, graph traversal, coloring, trees, and network applications.',
+    instructor: 'Prof. Hannah Lee',
+    location: 'McBryde 328',
+    schedule: 'MWF 9:00–9:50 AM',
+    enrolled: 19,
+    capacity: 32,
+    credits: 3,
+    prerequisites: ['MATH 1226'],
+    seatsLeft: 13,
+  },
+  {
+    id: 'STAT 3615',
+    department: 'Statistics',
+    title: 'Biological Statistics',
+    description:
+      'Experimental design, hypothesis testing, confidence intervals, regression, and statistical reasoning in applied contexts.',
+    instructor: 'Dr. Omar Bennett',
+    location: 'Data & Decision Sciences 145',
+    schedule: 'TR 11:00–12:15 PM',
+    enrolled: 45,
+    capacity: 50,
+    credits: 3,
+    prerequisites: ['MATH 1025'],
+    seatsLeft: 5,
+  },
+  {
     id: 'HCI 410',
+    department: 'Human-Computer Interaction',
     title: 'Human-Computer Interaction',
     description:
       'Principles of user-centered design, interface prototyping, evaluation methods, and usability engineering.',
@@ -42,6 +123,81 @@ const COURSES = [
     credits: 3,
     prerequisites: ['CS 210'],
     seatsLeft: 7,
+  },
+  {
+    id: 'HCI 430',
+    department: 'Human-Computer Interaction',
+    title: 'Usability Engineering Methods',
+    description:
+      'Structured interviews, surveys, task analysis, heuristic evaluation, cognitive walkthroughs, and usability reporting.',
+    instructor: 'Dr. Aisha Coleman',
+    location: 'Goodwin 155',
+    schedule: 'F 1:00–3:45 PM',
+    enrolled: 12,
+    capacity: 18,
+    credits: 3,
+    prerequisites: ['HCI 410'],
+    seatsLeft: 6,
+  },
+  {
+    id: 'ENGL 3764',
+    department: 'English',
+    title: 'Technical Writing',
+    description:
+      'Audience analysis, professional communication, documentation, usability of instructions, and revision strategies.',
+    instructor: 'Prof. Laura Mitchell',
+    location: 'Shanks 370',
+    schedule: 'MW 11:00–12:15 PM',
+    enrolled: 20,
+    capacity: 28,
+    credits: 3,
+    prerequisites: ['ENGL 1106'],
+    seatsLeft: 8,
+  },
+  {
+    id: 'ART 2385',
+    department: 'Art and Design',
+    title: 'Visual Design Studio',
+    description:
+      'Typography, layout, color, hierarchy, and critique-based visual design for print and digital interfaces.',
+    instructor: 'Maya Greene',
+    location: 'Armory 203',
+    schedule: 'TR 3:30–4:45 PM',
+    enrolled: 16,
+    capacity: 20,
+    credits: 3,
+    prerequisites: ['None'],
+    seatsLeft: 4,
+  },
+  {
+    id: 'BIT 3444',
+    department: 'Business Information Technology',
+    title: 'Advanced Business Computing and Applications',
+    description:
+      'Spreadsheet modeling, data cleaning, dashboards, analytics workflows, and business decision support systems.',
+    instructor: 'Dr. Kevin Brooks',
+    location: 'Pamplin 32',
+    schedule: 'MW 4:00–5:15 PM',
+    enrolled: 26,
+    capacity: 35,
+    credits: 3,
+    prerequisites: ['BIT 2405'],
+    seatsLeft: 9,
+  },
+  {
+    id: 'UNIV 101',
+    department: 'University Studies',
+    title: 'First-Year Seminar',
+    description:
+      'A small seminar focused on academic planning, campus resources, study strategies, and transition to college life.',
+    instructor: 'Jordan Wells',
+    location: 'Newman Library 207A',
+    schedule: 'W 3:00–3:50 PM',
+    enrolled: 14,
+    capacity: 18,
+    credits: 1,
+    prerequisites: ['None'],
+    seatsLeft: 4,
   },
 ];
 
@@ -60,13 +216,81 @@ const HOUR_HEIGHT = 80;
 const GRID_HEIGHT = (END_HOUR - START_HOUR) * HOUR_HEIGHT;
 
 export default function App() {
+  const [view, setView] = useState("browse");
+
+  return (
+    <div className="relative">
+      
+      {/* 🔘 ALWAYS visible toggle button */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() =>
+            setView(view === "browse" ? "user-centered" : "browse")
+            
+            
+          }
+          className="rounded-lg bg-[#1d3f73] px-4 py-2 text-white font-semibold shadow hover:brightness-110 transition"
+        >
+          {view === "browse" ? "to User-Centered View" : "to Activity-Centered View"}
+        </button>
+      </div>
+
+      {/* 🔄 View switch */}
+      {view === "browse" ? <ActivityCentered /> : <UserCentered />}
+    </div>
+  );
+}
+
+function ActivityCentered() {
   const [activeView, setActiveView] = useState('browse');
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
+  const [selectedCredits, setSelectedCredits] = useState('All Credits');
 
   const enrolledCourses = useMemo(
     () => COURSES.filter((course) => enrolledCourseIds.includes(course.id)),
     [enrolledCourseIds]
   );
+
+  const departments = useMemo(
+    () => ['All Departments', ...Array.from(new Set(COURSES.map((course) => course.department)))],
+    []
+  );
+
+  const filteredCourses = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return COURSES.filter((course) => {
+      const matchesSearch =
+        normalizedSearch === '' ||
+        [
+          course.id,
+          course.title,
+          course.description,
+          course.instructor,
+          course.location,
+          course.department,
+          course.schedule,
+          course.prerequisites.join(' '),
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(normalizedSearch);
+
+      const matchesDepartment =
+        selectedDepartment === 'All Departments' || course.department === selectedDepartment;
+
+      const matchesCredits =
+        selectedCredits === 'All Credits' ||
+        (selectedCredits === '1–2 Credits' && course.credits >= 1 && course.credits <= 2) ||
+        (selectedCredits === '3 Credits' && course.credits === 3) ||
+        (selectedCredits === '4+ Credits' && course.credits >= 4);
+
+      return matchesSearch && matchesDepartment && matchesCredits;
+    });
+  }, [searchTerm, selectedDepartment, selectedCredits]);
+
 
   const totalCredits = useMemo(
     () => enrolledCourses.reduce((sum, course) => sum + course.credits, 0),
@@ -152,22 +376,31 @@ export default function App() {
               <div className="grid gap-5 md:grid-cols-3">
                 <Field label="Search Courses">
                   <input
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
                     className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none ring-0 transition placeholder:text-slate-400 focus:border-[#7a294f]"
-                    placeholder="Course name or code..."
+                    placeholder="Try CS 375, usability, Park, or Torgersen..."
                   />
                 </Field>
 
                 <Field label="Department">
-                  <select className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#7a294f]">
-                    <option>All Departments</option>
-                    <option>Computer Science</option>
-                    <option>Mathematics</option>
-                    <option>Human-Computer Interaction</option>
+                  <select
+                    value={selectedDepartment}
+                    onChange={(event) => setSelectedDepartment(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#7a294f]"
+                  >
+                    {departments.map((department) => (
+                      <option key={department}>{department}</option>
+                    ))}
                   </select>
                 </Field>
 
                 <Field label="Credits">
-                  <select className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#7a294f]">
+                  <select
+                    value={selectedCredits}
+                    onChange={(event) => setSelectedCredits(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#7a294f]"
+                  >
                     <option>All Credits</option>
                     <option>1–2 Credits</option>
                     <option>3 Credits</option>
@@ -178,66 +411,109 @@ export default function App() {
             </section>
 
             <section className="mt-7 space-y-5">
-              {COURSES.map((course) => {
-                const isEnrolled = enrolledCourseIds.includes(course.id);
-
-                return (
-                  <article
-                    key={course.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+              <div className="flex items-center justify-between text-sm text-slate-500">
+                <span>
+                  Showing {filteredCourses.length} of {COURSES.length} courses
+                </span>
+                {(searchTerm || selectedDepartment !== 'All Departments' || selectedCredits !== 'All Credits') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedDepartment('All Departments');
+                      setSelectedCredits('All Credits');
+                    }}
+                    className="font-semibold text-[#9f1f39] hover:underline"
                   >
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-4">
-                          <span className="rounded-full bg-slate-100 px-4 py-1 text-sm font-semibold text-slate-600">
-                            {course.id}
-                          </span>
-                          <span className="text-sm font-semibold text-[#c39a57]">
-                            {course.seatsLeft} seats left
-                          </span>
+                    Clear filters
+                  </button>
+                )}
+              </div>
+
+              {filteredCourses.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-slate-500">
+                  No courses match those filters. Try a course code, instructor, department, or location.
+                </div>
+              ) : (
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredCourses.map((course) => {
+                    const isEnrolled = enrolledCourseIds.includes(course.id);
+
+                    return (
+                      <article
+                        key={course.id}
+                        className="group relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                              {course.id}
+                            </span>
+                            <span className="rounded-full bg-[#fff7ed] px-3 py-1 text-xs font-semibold text-[#9a3412]">
+                              {course.department}
+                            </span>
+                          </div>
+
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-[#9f1f39]">
+                              {course.credits}
+                            </div>
+                            <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                              Credits
+                            </div>
+                          </div>
                         </div>
 
-                        <h3 className="mt-4 text-4xl font-semibold tracking-tight text-[#2d1c1f]">
+                        <h3 className="mt-4 line-clamp-2 text-2xl font-semibold tracking-tight text-[#2d1c1f]">
                           {course.title}
                         </h3>
 
-                        <p className="mt-4 max-w-4xl text-xl leading-9 text-slate-500">
+                        <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">
                           {course.description}
                         </p>
 
-                        <div className="mt-6 grid gap-3 text-slate-700 md:grid-cols-2">
+                        <div className="mt-5 space-y-2 text-sm text-slate-700">
                           <InfoItem>{course.instructor}</InfoItem>
                           <InfoItem>{course.schedule}</InfoItem>
                           <InfoItem>{course.location}</InfoItem>
-                          <InfoItem>
-                            {course.enrolled}/{course.capacity} enrolled
-                          </InfoItem>
                         </div>
 
-                        <p className="mt-5 text-slate-500">
-                          Prerequisites: {course.prerequisites.join(', ')}
-                        </p>
-                      </div>
+                        <div className="mt-5 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-[#c39a57]">
+                              {course.seatsLeft} seats left
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {course.enrolled}/{course.capacity} enrolled
+                            </p>
+                          </div>
 
-                      <div className="flex flex-col items-end gap-4">
-                        <div className="text-right">
-                          <div className="text-4xl font-bold text-[#9f1f39]">{course.credits}</div>
-                          <div className="text-sm uppercase tracking-[0.2em] text-slate-500">Credits</div>
+                          <button
+                            onClick={() => toggleEnrollment(course.id)}
+                            className={`rounded-xl px-4 py-2 text-sm font-semibold text-white shadow transition hover:brightness-110 ${
+                              isEnrolled ? "bg-emerald-600" : "bg-[#1d3f73]"
+                            }`}
+                          >
+                            {isEnrolled ? "Enrolled" : "+ Add"}
+                          </button>
                         </div>
 
-                        <button
-                          onClick={() => toggleEnrollment(course.id)}
-                          className={`rounded-xl px-6 py-3 font-semibold text-white shadow transition hover:brightness-110 ${
-                            isEnrolled ? 'bg-emerald-600' : 'bg-[#1d3f73]'
-                          }`}
-                        >
-                          {isEnrolled ? 'Enrolled' : '+ Add Course'}
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
+                        <div className="pointer-events-none absolute left-4 right-4 top-full z-20 mt-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 opacity-0 shadow-xl transition group-hover:opacity-100">
+                          <p className="font-semibold text-[#2d1c1f]">Prerequisites</p>
+                          <p className="mt-1">
+                            {course.prerequisites?.length
+                              ? course.prerequisites.join(", ")
+                              : "None"}
+                          </p>
+
+                          <p className="mt-3 font-semibold text-[#2d1c1f]">Details</p>
+                          <p className="mt-1">{course.description}</p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           </>
         ) : (
@@ -386,13 +662,17 @@ function buildScheduleBlocks(courses) {
 }
 
 function parseSchedule(schedule) {
-  const match = schedule.match(/^([MTWRF]+)\s+(\d{1,2}:\d{2})–(\d{1,2}:\d{2})\s*(AM|PM)$/i);
+  const match = schedule.match(
+    /^([MTWRF]+)\s+(\d{1,2}:\d{2})\s*(AM|PM)?–(\d{1,2}:\d{2})\s*(AM|PM)$/i
+  );
   if (!match) return null;
 
-  const [, dayCodes, startRaw, endRaw, meridiem] = match;
+  const [, dayCodes, startRaw, startMeridiemRaw, endRaw, endMeridiemRaw] = match;
+  const endMeridiem = endMeridiemRaw.toUpperCase();
+  const startMeridiem = inferStartMeridiem(startRaw, endRaw, startMeridiemRaw, endMeridiem);
 
-  const start = to24Hour(startRaw, meridiem);
-  const end = to24Hour(endRaw, meridiem);
+  const start = to24Hour(startRaw, startMeridiem);
+  const end = to24Hour(endRaw, endMeridiem);
 
   return {
     days: dayCodes.split('').map((code) => DAY_CODE_MAP[code]),
@@ -401,6 +681,16 @@ function parseSchedule(schedule) {
     endHour: end.hour,
     endMinute: end.minute,
   };
+}
+
+function inferStartMeridiem(startTime, endTime, explicitStartMeridiem, endMeridiem) {
+  if (explicitStartMeridiem) return explicitStartMeridiem.toUpperCase();
+
+  const startHour = Number(startTime.split(':')[0]);
+  const endHour = Number(endTime.split(':')[0]);
+
+  if (endMeridiem === 'PM' && endHour === 12 && startHour < 12) return 'AM';
+  return endMeridiem;
 }
 
 function to24Hour(time, meridiem) {
